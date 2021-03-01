@@ -68,23 +68,27 @@
 
 <body>
     <div class="booksContainer">
-        <% books.forEach( (book,ind)=> { %> <form id=<%=ind %> method="post" action="/show"> <div> <img src=<%=book.img
-                        %> /> <input type="hidden" name="img" value="<%= book.url %>">
+        <p>Search Results</p>
+        <% books.forEach( (book,ind)=> { %>
+            <form method="post" action="/book">
+                <div> <img src=<%=book.img %> />
+                    <input type="hidden" name="img" value="<%= book.url %>">
                     <h3>
                         <%= book.title %>
-                    </h3> <input type="hidden" name="title" value="<%= book.title %>">
+                    </h3>
+                    <input type="hidden" name="title" value="<%= book.title %>">
                     <h4>
                         <%= book.author %>
-                    </h4> <input type="hidden" name="author" value="<%= book.author %>">
+                    </h4>
+                    <input type="hidden" name="author" value="<%= book.author %>">
                     <p>
                         <%= book.isbn %>
-                    </p> <input type="hidden" name="isbn" value="<%= book.isbn %>"> <input type="hidden"
-                        name="description" value="<%= book.description %>"> <button class="addBook">Add to my
-                        bookshelf</button>
+                    </p>
+                    <input type="hidden" name="isbn" value="<%= book.isbn %>">
+                    <input type="hidden" name="description" value="<%= book.description %>">
+                    <button class="addBook">Select this book!</button>
                 </div>
-            </form>
-            <% }) %>
-    </div>
+                <% }) %>
 </body>
 
 </html>
