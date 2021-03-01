@@ -1,84 +1,51 @@
-// 'use strict';
-
-// const express = require('express');
-// require('dotenv').config();
-// const superagent = require('superagent');
-
-
-// const PORT = process.env.PORT || 3000;
-// const app = express();
-
-// app.use(express.static('./public'));
-// app.use(express.urlencoded({ extended: true }));
-
-// // to tell the express, we want to use ejs template engine
-// app.set('view engine', 'ejs');
-
-// // localhost:3000/
-// app.get('/home', (req, res) => {
-//     // res.send('hello');
-//     res.render('pages/index');
-// })
-
-
-// // localhost:3000/pages/searches/new.ejs
-// app.get('/search', (req, res) => {
-//     // res.send('hello New');
-//     res.render('pages/searches/new.ejs');
-// })
-
-// app.get('/searches', (req, res) => {
-
-//     let title = req.query.search;
-//     let inAuthor = req.query.inauthor;
-//     let url = `https://www.googleapis.com/books/v1/volumes?q=${title}+inauthor:${title}`
-// });
-
-// // // localhost:3000/listFamily
-// // app.get('/listFamily', (req, res) => {
-
-// //     let people = ['atallah', 'mesina', 'razan', 'ali', 'sherry'];
-// //     res.render('list', { familyMembers: people });
-// // })
-
-// // app.get('/books', (req, res) => {
-// //     // get books from google api server
-// //     let url = `https://www.googleapis.com/books/v1/volumes?q=cats`;
-// //     superagent.get(url)
-// //         .then(booksResult => {
-// //             console.log(booksResult.body);
-// //             // res.send(booksResult.body);
-// //             res.render('booksList', { catLists: booksResult.body.items })
-// //         })
-// // })
-
-// app.listen(PORT, () => {
-//     console.log(`Listening on PORT ${PORT}`);
-// })
-
 'use strict';
 const { log, error } = require('console');
 const express = require('express');
 require('dotenv').config();
 const superagent = require('superagent');
-
+const pg = require('pg');
 const cors = require('cors');
 
 
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 const server = express();
 server.use(cors());
 server.use(express.static('./public'));
 server.use(express.urlencoded({ extended: true }));
 
+
+// Database Setup
+const client = new pg.Client(process.env.DATABASE_URL);
 // to tell the express, we want to use ejs template engine
 server.set('view engine', 'ejs');
 
 // localhost:3000/
 server.get('/', (req, res) => {
-    res.render('pages/index');
+    let SQL = `SELECT * FROM books;`;
+
+    client.query(SQL)
+        .then(result => {
+            // console.log(result.rows);
+            res.render('pages/index', { books: result.rows, rowsNumber: result.rowCount })
+        })
+
+
+    //res.render('pages/index');
 })
+
+server.get('/details/:id', (req, res) => {
+
+    let id = req.params.id;
+    let SQL = `SELECT * FROM books WHERE id=$1`;
+    let values = [id];
+    client.query(SQL, values).then(data => {
+        res.render('./pages/books/detail', { book: data.rows[0] });
+    })
+        .catch(e => { errorHandler('Error while getting the data from DB' + e, req, res) });
+
+
+});
 
 
 /////////////// error handler
@@ -86,8 +53,21 @@ server.get('/', (req, res) => {
 //     res.status(500).send('Sorry something went wrong')
 // })
 
-server.get('/search', (req, res) => {
+server.get('/searches', (req, res) => {
     res.render('pages/searches/new.ejs')
+})
+
+
+server.post('/book', (req, res) => {
+    let { url, title, author, isbn, description } = req.body;
+    let SQL = `INSERT INTO books (author,title,isbn,image_url,description) VALUES($1,$2,$3,$4,$5) RETURNING *`;
+    let safeValues = [author, title, isbn, url, description];
+    client.query(SQL, safeValues).then(data => {
+        let id = data.rows[0].id;
+        res.redirect(`/books/${id}`);
+
+    })
+    // .catch(e => { errorHandler('Error while getting the data which inserted to The Data Base ' + e, req, res) });
 })
 
 server.post('/searches/new', searchHandler);
@@ -113,9 +93,13 @@ function Books(data) {
     this.title = data.volumeInfo.title
     this.author = data.volumeInfo.authors
     this.img = data.volumeInfo.imageLinks.thumbnail || 'https://i.imgur.com/J5LVHEL.jpg';
+    this.discription = data.volumeInfo.discription;
 }
 console.log(savedBooks);
 
-server.listen(PORT, () => {
-    console.log(`Listening on PORT ${PORT}`);
-})
+
+
+client.connect()
+    .then(() => {
+        server.listen(PORT, () => console.log(`Listening on port: ${PORT}`));
+    })

@@ -13,8 +13,33 @@
 
 
     <li> <a href="/">Home Page</a></li>
-    <li><a href="/search">Search</a></li>
+    <li><a href="/searches">Search</a></li>
     <li></li>
+    <p>Number Of Saved Books <%= rowsNumber %>
+    </p>
+    <div class="booksContainer">
+
+        <% books.forEach(book=> { %>
+            <div id=<%=book.id %> >
+                <img src=<%=book.image_url %> />
+                <h3>
+                    <%= book.title %>
+                </h3>
+                <h4>
+                    <%= book.author %>
+                </h4>
+                <p class="isbn">
+                    <%= book.isbn %>
+                </p>
+                <p class="discription">
+                    <%= book.discription %>
+                </p>
+            </div>
+
+            <% }) %>
+
+
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="/app.js"></script>
