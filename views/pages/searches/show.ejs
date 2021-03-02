@@ -70,25 +70,30 @@
     <div class="booksContainer">
         <p>Search Results</p>
         <% books.forEach( (book,ind)=> { %>
-            <form method="post" action="/book">
-                <div> <img src=<%=book.img %> />
-                    <input type="hidden" name="img" value="<%= book.url %>">
-                    <h3>
-                        <%= book.title %>
-                    </h3>
-                    <input type="hidden" name="title" value="<%= book.title %>">
-                    <h4>
-                        <%= book.author %>
-                    </h4>
-                    <input type="hidden" name="author" value="<%= book.author %>">
-                    <p>
-                        <%= book.isbn %>
-                    </p>
-                    <input type="hidden" name="isbn" value="<%= book.isbn %>">
-                    <input type="hidden" name="description" value="<%= book.description %>">
-                    <button class="addBook">Select this book!</button>
-                </div>
-                <% }) %>
+            <section>
+                <img src=<%=book.image_url %> />
+                <h3>
+                    <%= book.title %>
+                </h3>
+                <h4>
+                    <%= book.author %>
+                </h4>
+                <p>
+                    <%= book.description%>
+                </p>
+            </section>
+            <form method="post" action="/addBook">
+
+                <input type="hidden" name="image_url" value="<%= book.image_url %>">
+                <input type="hidden" name="title" value="<%= book.title %>">
+                <input type="hidden" name="author" value="<%= book.author %>">
+                <input type="hidden" name="isbn" value="<%= book.isbn %>">
+                <input type="hidden" name="description" value="<%= book.description %>">
+                <button class="addBook">Select this book!</button>
+
+
+            </form>
+            <% }) %>
 </body>
 
 </html>
